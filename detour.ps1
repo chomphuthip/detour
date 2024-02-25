@@ -1,18 +1,24 @@
-﻿Add-Type -Name Window -Namespace Console -MemberDefinition '
+﻿
+<# 
+.NAME
+    Detour
+#>
+
+Add-Type -Name Window -Namespace Console -MemberDefinition '
 [DllImport("Kernel32.dll")]
 public static extern IntPtr GetConsoleWindow();
 
 [DllImport("user32.dll")]
 public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);'
 
+If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
+    Start-Process PowerShell.exe -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
+}
+
 if ($MyInvocation.InvocationName -eq '&') { 
     [Console.Window]::ShowWindow([Console.Window]::GetConsoleWindow(), 0)
 }
 
-<# 
-.NAME
-    Detour
-#>
 
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.Application]::EnableVisualStyles()
